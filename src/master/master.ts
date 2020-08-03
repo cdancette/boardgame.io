@@ -243,12 +243,27 @@ export class Master {
     // that can make moves right now and the person doing the
     // action is that player.
     if (action.type == UNDO || action.type == REDO) {
-      if (
-        state.ctx.currentPlayer !== playerID ||
-        state.ctx.activePlayers !== null
-      ) {
+      if (state.ctx.currentPlayer !== playerID) {
         logging.error(`playerID=[${playerID}] cannot undo / redo right now`);
         return;
+      }
+      if (state.ctx.activePlayers !== null) {
+        // Only allow if there is only one active player in
+        // ctx.activePlayers, and it's the current player.
+        if (Object.keys(state.ctx.activePlayers).length >= 2) {
+          logging.error(
+            `playerID=[${playerID}] cannot undo / redo right now. Multiple people are playing.`
+          );
+          return;
+        } else if (
+          Object.keys(state.ctx.activePlayers).length === 1 &&
+          Object.keys(state.ctx.activePlayers)[0] !== state.ctx.currentPlayer
+        ) {
+          logging.error(
+            `playerID=[${playerID}] cannot undo / redo right now. Multiple people are playing.`
+          );
+          return;
+        }
       }
     }
 
